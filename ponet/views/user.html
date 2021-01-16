@@ -1,0 +1,38 @@
+<h1>{{.TplParams.FullName}}</h1>
+({{.TplParams.Identity}}, {{.User.Age}})
+
+{{if compare .User.ID .UserID }}
+<a href="/profile">Отредактировать информацию</a>
+{{else}}
+{{if .TplParams.IsFriend}}
+Вы - Друзья!
+{{else}}
+<form action="/befriend/{{.User.ID}}" method="post"><input type="submit" value="Подружиться"></form>
+{{end}}
+{{end}}
+<hr/>
+<br/>
+Живу в {{.User.Location}}
+<br/>
+<br/>
+<hr/>
+Мои интересы:
+<br/>
+<ul>
+{{range .Hobbies}}
+<li>{{.}}
+{{end}}
+</ul>
+<br/>
+<br/>
+<hr/>
+Мои друзья:
+<br/>
+<ul>
+{{with .Friends}}
+{{range .}}
+    <li><a href="/users/{{.ID}}">{{.Title}}</a>
+{{end}}
+{{end}}
+</ul>
+</br>

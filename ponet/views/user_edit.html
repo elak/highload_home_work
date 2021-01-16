@@ -1,0 +1,95 @@
+<h2>Расскажи о себе своим будущим друзьям</h2>
+<br/>
+<hr/>
+<br/>
+<form action="{{.TplParams.EndPoint}}" method="post">
+    <table>
+{{if .TplParams.IsNew}}
+        <tr>
+            <td>
+                Твой почтовый адрес:
+            </td>
+            <td>
+                <input name="eMail" type="text" value="{{.User.Login}}">
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                Пароль:
+            </td>
+            <td>
+                <input name="password" type="password">
+            </td>
+
+        </tr>
+{{else}}
+                <input name="eMail" type="hidden" value="{{.User.Login}}">
+{{end}}
+        <tr>
+            <td>
+
+                Как тебя зовут:
+            </td>
+            <td>
+                <input name="name" type="text" value="{{.TplParams.FullName}}">
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                Сколько тебе лет:
+            </td>
+            <td>
+                <input name="age" type="text" value="{{.User.Age}}">
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                Подскажи - кто ты:
+            </td>
+            <td>
+
+                <select name="identity">
+                    <option value="0" {{ map_get .TplParams.IdentitySelect 0 | attr}}>Это секрет</option>
+                    <option value="1" {{ map_get .TplParams.IdentitySelect 1 | attr}}>Пони девочка</option>
+                    <option value="2" {{ map_get .TplParams.IdentitySelect 2 | attr}}>Пони мальчик</option>
+                    <option value="3" {{ map_get .TplParams.IdentitySelect 3 | attr}}>Пегас девочка</option>
+                    <option value="4" {{ map_get .TplParams.IdentitySelect 4 | attr}}>Пегас мальчик</option>
+                    <option value="5" {{ map_get .TplParams.IdentitySelect 5 | attr}}>Единорог девочка</option>
+                    <option value="6" {{ map_get .TplParams.IdentitySelect 6 | attr}}>Единорог мальчик</option>
+                </select>
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                Где ты живёшь
+            </td>
+            <td>
+                <input name="address" type="text" value="{{.User.Location}}">
+            </td>
+
+        </tr>
+        <tr>
+            <td colspan="2">
+                Чем ты интересуешься:
+            </td>
+
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <textarea rows="7" cols="50" name="hobbies">{{.TplParams.Hobbies}}</textarea>
+            </td>
+
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+
+                <input type="submit">
+            </td>
+
+        </tr>
+    </table>
+</form>
