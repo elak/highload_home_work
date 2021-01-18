@@ -54,14 +54,14 @@ func (rm *RelationsManager) Befriend(user1, user2 int64) (res RelationsType, err
 
 	db, _ := orm.GetDB("default")
 
-	tx, err:=db.Begin()
+	tx, err := db.Begin()
 	if err != nil {
 		return
 	}
 
 	commit := false
 	defer func() {
-		if commit{
+		if commit {
 			err = tx.Commit()
 		} else {
 			err = tx.Rollback()
@@ -69,7 +69,7 @@ func (rm *RelationsManager) Befriend(user1, user2 int64) (res RelationsType, err
 	}()
 
 	qText := "UPDATE user_relations SET RelationType=? where UserID=? and RelationId=?"
-	execResult, err := db.Exec(qText, user1, user2, 1)
+	execResult, err := db.Exec(qText, MutualFriend, user2, user1)
 	if err != nil {
 		return
 	}
@@ -85,7 +85,7 @@ func (rm *RelationsManager) Befriend(user1, user2 int64) (res RelationsType, err
 		res = MutualFriend
 	}
 
-	qText = "insert into user_relations(UserID, RelationId, RelationType) values (?, ?, ?) on duplicate KEY update RelationType=VALUES(RelationType)"
+	qText = "insert into user_relations(UserID, RelationId, RelationType) values (?, ?, ?) on duplicate KEY update RelationType=RelationType"
 
 	_, err = db.Exec(qText, user1, user2, res)
 	if err != nil {
