@@ -27,10 +27,28 @@ func (c *UsersController) List() {
 
 	SetSessionContext(&c.Controller)
 
-	c.Data["Users"], err = models.Users.All()
+	name := c.GetString("name", "")
+	familyname := c.GetString("familyname", "")
+
+	var searchParams models.UserFilter
+
+	if len(familyname) > 0 {
+		searchParams.ByFamilyName = &familyname
+	}
+
+	if len(name) > 0 {
+		searchParams.ByName = &name
+	}
+
+	if searchParams.IsEmpty() {
+		c.Data["Users"], err = models.Users.All()
+	} else {
+		c.Data["Users"], err = models.Users.Some(searchParams)
+	}
 
 	if err != nil {
 		SetUserMessage("error", "DB error.", &c.Controller)
+		c.Ctx.ResponseWriter.Status = 500
 	}
 
 	c.Layout = "layout.html"
@@ -138,14 +156,15 @@ func (c *UsersController) Get() {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 
 	if err != nil {
-		SetUserMessage("warning", "Пользователь не найден.", &c.Controller)
+		SetUserMessage("warning", "Поньзователь не найден.", &c.Controller)
 		c.Redirect("/", 302)
 		return
 	}
 
 	user, err := models.Users.Find(id)
 	if user == nil {
-		SetUserMessage("warning", "Пользователь не найден.", &c.Controller)
+		SetUserMessage("warning", "Поньзователь не найден.", &c.Controller)
+		c.Redirect("/", 302)
 		return
 	}
 

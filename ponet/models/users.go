@@ -20,13 +20,23 @@ type User struct {
 }
 
 type UserFilter struct {
-	ByID       *[]int64
-	Title      *string
-	FamilyName *string
-	ByAge      *int64
-	ByIdentity *[]int64
-	ByLocation *string
-	ByLogin    *string
+	ByID         *[]int64
+	ByName       *string
+	ByFamilyName *string
+	ByAge        *int64
+	ByIdentity   *[]int64
+	ByLocation   *string
+	ByLogin      *string
+}
+
+func (uf *UserFilter) IsEmpty() bool {
+	return uf.ByID == nil &&
+		uf.ByName == nil &&
+		uf.ByFamilyName == nil &&
+		uf.ByAge == nil &&
+		uf.ByIdentity == nil &&
+		uf.ByLocation == nil &&
+		uf.ByLogin == nil
 }
 
 var Users *UserManager
@@ -128,8 +138,9 @@ func (um *UserManager) Save(newUser *User) (*User, error) {
 func (um *UserManager) All() ([]User, error) {
 
 	db, _ := orm.GetDB("default")
-
-	rows, err := db.Query("SELECT ID, Name from users")
+	qText := "SELECT ID, Name from users"
+	qText += " order by rand() Limit 100"
+	rows, err := db.Query(qText)
 	if err != nil {
 		return nil, err
 	}
@@ -156,16 +167,27 @@ func (um *UserManager) Some(filter UserFilter) ([]User, error) {
 	queryConditions := make([]string, 0)
 	queryArguments := make([]interface{}, 0)
 
-	if filter.ByLogin != nil{
+	if filter.ByLogin != nil {
 		queryConditions = append(queryConditions, "login=?")
 		queryArguments = append(queryArguments, *filter.ByLogin)
 	}
 
-	if len(queryConditions) == 0{
+	if filter.ByName != nil {
+		queryConditions = append(queryConditions, "Name like ?")
+		queryArguments = append(queryArguments, *filter.ByName)
+	}
+
+	if filter.ByFamilyName != nil {
+		queryConditions = append(queryConditions, "familyname like ?")
+		queryArguments = append(queryArguments, *filter.ByFamilyName)
+	}
+
+	if len(queryConditions) == 0 {
 		return nil, nil
 	}
 
 	fielsdQuery += " WHERE (" + strings.Join(queryConditions, ") AND (") + ")"
+	fielsdQuery += " ORDER BY ID "
 
 	rows, err := db.Query(fielsdQuery, queryArguments...)
 	if err != nil {
