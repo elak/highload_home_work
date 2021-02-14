@@ -55,7 +55,7 @@ func salt() string {
 func (um *UserManager) Exist(login, pwd string) (*User, error) {
 	hashed := sha512.Sum512([]byte(pwd + salt()))
 
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("read from")
 
 	rows, err := db.Query("SELECT ID, Name, familyname from users where login=? and pwd_hashed=?", login, fmt.Sprintf("%x", hashed))
 	if err != nil {
@@ -76,7 +76,7 @@ func (um *UserManager) Exist(login, pwd string) (*User, error) {
 }
 
 func (um *UserManager) Find(ID int64) (*User, error) {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("read from")
 
 	rows, err := db.Query("SELECT ID, Name, familyname, age, sex, location from users where id=?", ID)
 	if err != nil {
@@ -97,7 +97,7 @@ func (um *UserManager) Find(ID int64) (*User, error) {
 }
 
 func (um *UserManager) Add(newUser *User) (*User, error) {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("write to")
 
 	pwdHashed := sha512.Sum512([]byte(newUser.PwdHashed + salt()))
 	pwdStr := fmt.Sprintf("%x", pwdHashed)
@@ -118,7 +118,7 @@ func (um *UserManager) Add(newUser *User) (*User, error) {
 }
 
 func (um *UserManager) Save(newUser *User) (*User, error) {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("write to")
 
 	qText := "UPDATE users SET Name=?, familyname=?, age=?, sex=?, location=? WHERE id=?"
 
@@ -137,7 +137,7 @@ func (um *UserManager) Save(newUser *User) (*User, error) {
 
 func (um *UserManager) All() ([]User, error) {
 
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("read from")
 	qText := "SELECT ID, Name from users"
 	qText += " order by rand() Limit 100"
 	rows, err := db.Query(qText)
@@ -161,7 +161,7 @@ func (um *UserManager) All() ([]User, error) {
 }
 
 func (um *UserManager) Some(filter UserFilter) ([]User, error) {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("read from")
 
 	fielsdQuery := "SELECT ID, Name from users"
 	queryConditions := make([]string, 0)

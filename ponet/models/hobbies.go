@@ -19,7 +19,7 @@ func init() {
 }
 
 func fillIDs(list []string, newItems *map[string]int64) error {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("write to")
 
 	args := make([]interface{}, len(list))
 	for i, str := range list {
@@ -54,7 +54,7 @@ func fillIDs(list []string, newItems *map[string]int64) error {
 }
 
 func addTitles(list []string, newItems *map[string]int64) error {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("write to")
 
 	args := make([]interface{}, 0, len(list)-len(*newItems))
 	newList := make([]string, 0, len(list)-len(*newItems))
@@ -102,7 +102,7 @@ func getIDs(list []string) ([]int64, error) {
 }
 
 func (hm *HobbiesManager) List(user int64) ([]string,error) {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("heavy read from")
 
 	qText := "SELECT Title from view_hobby where UserID=?"
 	rows, err := db.Query(qText, user)
@@ -129,7 +129,7 @@ func (hm *HobbiesManager) List(user int64) ([]string,error) {
 }
 
 func (hm *HobbiesManager) Update(list []string, user int64) error {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("write to")
 
 	IDs, err := getIDs(list)
 	if err != nil {

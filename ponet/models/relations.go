@@ -26,7 +26,7 @@ func init() {
 }
 
 func (rm *RelationsManager) GetFriends(user int64) ([]User, error) {
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("heavy read from")
 
 	rows, err := db.Query("SELECT RelationId, Name, familyname from view_relations where UserID=?", user)
 	if err != nil {
@@ -52,7 +52,7 @@ func (rm *RelationsManager) GetFriends(user int64) ([]User, error) {
 func (rm *RelationsManager) Befriend(user1, user2 int64) (res RelationsType, err error) {
 	res = NotRelated
 
-	db, _ := orm.GetDB("default")
+	db, _ := orm.GetDB("write to")
 
 	tx, err := db.Begin()
 	if err != nil {

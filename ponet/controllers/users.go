@@ -6,6 +6,7 @@ import (
 	"github.com/elak/highload_home_work/ponet/models"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type UsersController struct {
@@ -161,11 +162,43 @@ func (c *UsersController) Get() {
 		return
 	}
 
-	user, err := models.Users.Find(id)
+	var user *models.User
+	var userFriends []models.User
+	var userHobbies []string
+	var errFriends, errHobbies error
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		user, err = models.Users.Find(id)
+	}()
+
+	go func() {
+		defer wg.Done()
+		userFriends, errFriends = models.Relations.GetFriends(id)
+	}()
+
+	go func() {
+		defer wg.Done()
+		userHobbies, errHobbies = models.Hobbies.List(id)
+	}()
+
+	wg.Wait()
+
 	if user == nil {
 		SetUserMessage("warning", "Поньзователь не найден.", &c.Controller)
 		c.Redirect("/", 302)
 		return
+	}
+
+	if errHobbies != nil {
+		SetUserMessage("warning", "DB error.", &c.Controller)
+	}
+
+	if errFriends != nil {
+		SetUserMessage("warning", "DB error.", &c.Controller)
 	}
 
 	c.Layout = "layout.html"
@@ -179,16 +212,8 @@ func (c *UsersController) Get() {
 
 	c.Data["User"] = user
 	c.Data["TplParams"] = &formData
-
-	c.Data["Friends"], err = models.Relations.GetFriends(id)
-	if err != nil {
-		SetUserMessage("warning", "DB error.", &c.Controller)
-	}
-
-	c.Data["Hobbies"], err = models.Hobbies.List(id)
-	if err != nil {
-		SetUserMessage("warning", "DB error.", &c.Controller)
-	}
+	c.Data["Friends"] = userFriends
+	c.Data["Hobbies"] = userHobbies
 
 }
 
@@ -308,6 +333,5 @@ func (c *UsersController) Befriend() {
 
 		SetUserMessage("success", msg, &c.Controller)
 	}
-	
 	c.Redirect("/users/"+idStr, 302)
 }
